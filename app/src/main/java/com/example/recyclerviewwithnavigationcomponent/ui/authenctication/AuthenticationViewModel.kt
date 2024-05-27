@@ -14,8 +14,8 @@ import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.Loc
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.RemoteLoginImpl
 import com.example.recyclerviewwithnavigationcomponent.data.model.AuthPreferences
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataStore
-import com.example.recyclerviewwithnavigationcomponent.data.repository.LocalLoginDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.repository.RemoteLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.LocalLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.RemoteLoginDataSource
 import com.example.recyclerviewwithnavigationcomponent.domain.LoginRepository
 import kotlinx.coroutines.launch
 

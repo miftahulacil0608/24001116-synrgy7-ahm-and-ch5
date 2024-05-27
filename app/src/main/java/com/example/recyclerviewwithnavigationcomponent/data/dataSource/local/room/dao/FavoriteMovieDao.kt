@@ -1,25 +1,23 @@
 package com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.DetailMovieEntity
+import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.FavoriteMovieEntity
 
 @Dao
 interface FavoriteMovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertMovieToFavorite(dataMovie: DetailMovieEntity)
+    suspend fun insertMovieToFavorite(dataMovie: FavoriteMovieEntity)
 
-    @Update
-    fun updateMovieFromFavorite(dataMovie: DetailMovieEntity)
+    @Query("SELECT * FROM FavoriteMovieEntity")
+    fun getAllFavoriteMovie(): LiveData<List<FavoriteMovieEntity>>
 
-    @Query("SELECT * FROM DetailMovieEntity")
-    fun getAllFavoriteMovie(): List<DetailMovieEntity>
+    @Query("DELETE FROM FavoriteMovieEntity WHERE id = :id")
+    suspend fun deleteMovieFromFavorite(id: Int)
 
-    //masih belum fix
-    @Delete
-    fun deleteMovieFromFavorite(dataMovie: DetailMovieEntity)
+    @Query("SELECT EXISTS (SELECT * FROM FavoriteMovieEntity WHERE id = :id)")
+    suspend fun isExistsMovieFavorite(id: Int): Boolean
 }

@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.recyclerviewwithnavigationcomponent.R
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Movies
 import com.example.recyclerviewwithnavigationcomponent.databinding.FragmentFavoriteBinding
 import com.example.recyclerviewwithnavigationcomponent.ui.adapter.MovieRecyclerView
@@ -28,11 +30,11 @@ class FavoriteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val favoriteAdapter = MovieRecyclerView(itemClicked = {
             itemClicked(it)
         })
-        viewModel.dataMovie.observe(viewLifecycleOwner) {
+
+        viewModel.dataFavoriteMovie.observe(viewLifecycleOwner) {
             favoriteAdapter.submitList(it)
         }
 
@@ -44,9 +46,9 @@ class FavoriteFragment : Fragment() {
     }
 
     private fun itemClicked(data: Movies) {
-        /*findNavController().navigate(R.id.action_favoriteFragment_to_detailLeagueTeams).also {
-            viewModel.setDataDetail(data)
-        }*/
+        findNavController().navigate(R.id.action_favoriteFragment_to_detailMovie).also {
+            viewModel.setDetailMovie(data.id)
+        }
     }
 
 

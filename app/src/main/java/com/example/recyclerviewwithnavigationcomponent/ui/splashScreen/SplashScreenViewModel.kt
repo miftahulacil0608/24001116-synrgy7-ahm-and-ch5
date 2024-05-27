@@ -7,18 +7,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.example.recyclerviewwithnavigationcomponent.data.LoginDataSource
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.LocalLoginImpl
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.RemoteLoginImpl
 import com.example.recyclerviewwithnavigationcomponent.data.model.AuthPreferences
-import com.example.recyclerviewwithnavigationcomponent.data.model.SharedPreferences
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataStore
-import com.example.recyclerviewwithnavigationcomponent.data.repository.LocalLoginDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.repository.RemoteLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.LocalLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.RemoteLoginDataSource
 import com.example.recyclerviewwithnavigationcomponent.domain.LoginRepository
-import kotlinx.coroutines.launch
 
 class SplashScreenViewModel(private val loginRepository: LoginRepository) : ViewModel() {
 

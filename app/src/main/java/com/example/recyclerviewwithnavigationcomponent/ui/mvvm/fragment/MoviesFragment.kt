@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recyclerviewwithnavigationcomponent.R
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.LeagueWithTeamsList
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Movies
 import com.example.recyclerviewwithnavigationcomponent.databinding.FragmentMoviesBinding
 import com.example.recyclerviewwithnavigationcomponent.ui.adapter.MovieRecyclerView
@@ -70,11 +69,7 @@ class MoviesFragment : Fragment() {
             true
             }
             R.id.btn_favorite ->{
-                //findNavController().navigate(R.id.action_moviesFragment_to_favoriteFragment)
-                true
-            }
-            R.id.btn_logout -> {
-                viewModel.logout()
+                findNavController().navigate(R.id.action_moviesFragment_to_favoriteFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -107,15 +102,6 @@ class MoviesFragment : Fragment() {
         }
     }
 
-    //refactor (must be deleted)
-    private fun favoriteClicked(data: LeagueWithTeamsList) {
-        val dataLeague = data.leagueEntity
-        if (dataLeague.favorite) {
-            viewModel.deleteFavorite(dataLeague)
-        } else {
-            viewModel.saveFavorite(dataLeague)
-        }
-    }
 
     private fun clicked(data: Movies) {
         findNavController().navigate(

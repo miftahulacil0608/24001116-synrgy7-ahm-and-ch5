@@ -18,5 +18,5 @@ data class DetailMovie(
     val productionCompanies: List<ProductionCompany>,
     val releaseDate: String,
     val runtime: String,
-    val voteAverage: String,
+    val voteAverage: Double,
 ):Parcelable

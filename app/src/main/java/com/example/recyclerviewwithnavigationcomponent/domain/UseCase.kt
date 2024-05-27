@@ -1,24 +1,19 @@
 package com.example.recyclerviewwithnavigationcomponent.domain
 
-import android.content.res.Resources
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.LeagueEntity
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.LeagueWithTeamsList
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.DataItemCollections
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.DetailMovie
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Movies
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.UserProfileData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.log
 
 class UseCase(
     private val movieRepository: MovieRepository,
     private val loginRepository: LoginRepository,
 ) {
-    // ini yang akan dikonsumsi sama recyclerview kedepannya
+    //Data Movie for Recyclerview
     fun getListMovieNowPlaying(): LiveData<List<Movies>> = liveData {
         try {
             val listDataMovie = movieRepository.getAllDataMoviesNowPlaying()
@@ -28,12 +23,13 @@ class UseCase(
         }
     }
 
+    //Detail Movie
     suspend fun setDetailMovie(movieId: Int): DetailMovie? {
         return movieRepository.setDetailMovie(movieId)
     }
 
+    //Collections
     suspend fun getDetailCollections(collectionId: Int): List<DataItemCollections> {
-
         return when (collectionId) {
             1 -> {
                 withContext(Dispatchers.IO) {
@@ -50,25 +46,40 @@ class UseCase(
 
     }
 
-    fun getFavorite(): LiveData<List<LeagueWithTeamsList>> {
-        return movieRepository.getAllDataFavorite()
-    }
-
-    suspend fun setFavorite(leagueData: LeagueEntity, isFavorite: Boolean) {
-        leagueData.favorite = isFavorite
-        movieRepository.updateLeagueData(leagueData)
-    }
-
-    suspend fun getAllDataUserProfile(): UserProfileData{
+    //Authentication logic
+    suspend fun getAllDataUserProfile(): UserProfileData {
         return loginRepository.getAllDataUserProfile()
     }
 
-    suspend fun updateDataUserProfile(username: String, email: String, password: String){
+    suspend fun updateDataUserProfile(username: String, email: String, password: String) {
         loginRepository.updateUserProfile(username, email, password)
     }
 
     suspend fun clearDataAuth() {
         loginRepository.clearDataAccount()
+    }
+
+    //Local Database
+    suspend fun checkMovieFavorite(id: Int): Boolean {
+         return movieRepository.checkFavoriteMovie(id)
+    }
+
+    suspend fun insertDataMovieFavorite(movies: Movies) {
+        movieRepository.insertFavoriteMovie(movies)
+    }
+
+    suspend fun deleteFromFavoriteMovie(id: Int) {
+        movieRepository.deleteFavoriteMovie(id)
+    }
+
+    fun getAllDataFavoriteMovie(): LiveData<List<Movies>> = liveData {
+        try {
+            //kalo udh bisa dependency/sealead class bisa gunakan emit() untuk memasukkan state yang terjadi
+            val listDataMovie = movieRepository.getAllFavoriteMovie()
+            emitSource(listDataMovie)
+        } catch (throwable: Throwable) {
+            throw IllegalAccessException(throwable.message)
+        }
     }
 
 }

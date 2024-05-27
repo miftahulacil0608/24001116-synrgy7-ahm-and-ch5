@@ -2,6 +2,7 @@ package com.example.recyclerviewwithnavigationcomponent.data.model
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.FavoriteMovieEntity
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.retrofit.model.detailcollection.Part
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.retrofit.model.detailsresponse.DetailMovieResponse
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.retrofit.model.nowplayingresponse.anotherdataclass.MovieResponse
@@ -36,7 +37,7 @@ fun DetailMovieResponse.toDetailMovie(): DetailMovie {
         productionCompanies = productionCompanies,
         releaseDate = releaseDate,
         runtime = "Runtime: $runtime minutes",
-        voteAverage = "Vote $voteAverage",
+        voteAverage = voteAverage,
     )
 }
 
@@ -56,5 +57,25 @@ fun UserProfileData.toLiveData(): LiveData<UserProfileData> {
             password = password,
             token = token
         )
+    )
+}
+
+fun Movies.toFavoriteMovieEntity(): FavoriteMovieEntity {
+    return FavoriteMovieEntity(
+        id = id,
+        titleMovie = originalTitle,
+        posterImage = image,
+        releaseDate = releaseDate,
+        voteAverage = voteAverage
+    )
+}
+
+fun FavoriteMovieEntity.toMovies(): Movies {
+    return Movies(
+        id = id,
+        originalTitle = titleMovie,
+        image = posterImage,
+        releaseDate = releaseDate,
+        voteAverage = voteAverage
     )
 }

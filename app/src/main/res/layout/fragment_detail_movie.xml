@@ -38,6 +38,16 @@
         app:layout_constraintTop_toTopOf="@id/space"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.RoundedImageForDetail" />
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/btn_favorite"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/add_bookmark_favorite"
+        app:layout_constraintBottom_toBottomOf="@+id/detail_summary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/detail_summary"
+        app:layout_constraintTop_toTopOf="@+id/detail_summary" />
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/materialCardView"
         android:layout_width="0dp"

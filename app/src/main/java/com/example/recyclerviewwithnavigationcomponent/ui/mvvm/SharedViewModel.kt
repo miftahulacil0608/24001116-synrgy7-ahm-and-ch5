@@ -6,16 +6,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import androidx.savedstate.SavedStateRegistryOwner
 import com.example.recyclerviewwithnavigationcomponent.data.MovieRepositoryImpl
 import com.example.recyclerviewwithnavigationcomponent.data.LoginDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.LocalLeagueImpl
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.LocalLoginImpl
+import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.LocalMovieImpl
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.AppDatabase
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.LeagueEntity
-import com.example.recyclerviewwithnavigationcomponent.data.dataSource.local.room.entity.LeagueWithTeamsList
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.RemoteMovieImpl
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.RemoteLoginImpl
 import com.example.recyclerviewwithnavigationcomponent.data.dataSource.remote.retrofit.MovieService
@@ -26,10 +25,10 @@ import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Deta
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Movies
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.UserProfileData
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataStore
-import com.example.recyclerviewwithnavigationcomponent.data.repository.LocalLeagueDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.repository.LocalLoginDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.repository.RemoteMovieDataSource
-import com.example.recyclerviewwithnavigationcomponent.data.repository.RemoteLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.LocalLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.movie.RemoteMovieDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.authentication.RemoteLoginDataSource
+import com.example.recyclerviewwithnavigationcomponent.data.repository.movie.LocalMovieDataSource
 import com.example.recyclerviewwithnavigationcomponent.domain.MovieRepository
 import com.example.recyclerviewwithnavigationcomponent.domain.LoginRepository
 import com.example.recyclerviewwithnavigationcomponent.domain.UseCase
@@ -61,25 +60,22 @@ class SharedViewModel(
 
                     val remoteMovieDataSource: RemoteMovieDataSource =
                         RemoteMovieImpl(
-                            appDatabase.leagueDao(),
-                            appDatabase.teamsDao(),
                             movieService
                         )
-                    val localLeagueDataSource: LocalLeagueDataSource =
-                        LocalLeagueImpl(appDatabase.leagueDao())
+                    val localMovieDataSource: LocalMovieDataSource =
+                        LocalMovieImpl(appDatabase.favoriteMovieDao())
 
                     val authPreferences = AuthPreferences(context.dataStore)
 
                     val remoteLoginDataSource: RemoteLoginDataSource =
                         RemoteLoginImpl(authPreferences)
                     val localLoginDataSource: LocalLoginDataSource = LocalLoginImpl(
-                        /*SharedPreferences().getSharedPreferences(context.applicationContext)*/
                         authPreferences
                     )
 
                     val movieRepository: MovieRepository = MovieRepositoryImpl(
                         remoteMovieDataSource = remoteMovieDataSource,
-                        localLeagueDataSource = localLeagueDataSource,
+                        localMovieDataSource = localMovieDataSource,
                     )
                     val loginRepository: LoginRepository = LoginDataSource(
                         remoteLoginDataSource = remoteLoginDataSource,
@@ -98,23 +94,12 @@ class SharedViewModel(
             }
     }
 
-
-    private var _successLogout = MutableLiveData<Boolean>()
-    val successLogout: LiveData<Boolean> = _successLogout
+    //data film
+    val dataMovie: LiveData<List<Movies>> = useCase.getListMovieNowPlaying()
 
 
     private val _dataCollections: MutableLiveData<List<DataItemCollections>> = MutableLiveData()
     val dataCollections: LiveData<List<DataItemCollections>> = _dataCollections
-
-
-    //data film
-    val dataMovie: LiveData<List<Movies>> = useCase.getListMovieNowPlaying()
-
-    //dataDetailMovie
-    private val _dataDetailMovie: MutableLiveData<DetailMovie> = MutableLiveData()
-    val dataDetailMovie: LiveData<DetailMovie> = _dataDetailMovie
-
-    //data user profile
 
     private fun clearDataCollections() {
         _dataCollections.value = emptyList() // Mengosongkan data koleksi
@@ -124,12 +109,26 @@ class SharedViewModel(
         _dataCollections.value = newData // Memperbarui data koleksi dengan data baru
     }
 
+
+    //dataDetailMovie
+    private val _dataDetailMovie: MutableLiveData<DetailMovie> = MutableLiveData()
+    val dataDetailMovie: LiveData<DetailMovie> = _dataDetailMovie
+
+    private val _isDataDetailExist: MutableLiveData<Boolean> = MutableLiveData()
+    val isDataDetailExist: LiveData<Boolean> = _isDataDetailExist
+
+    private val _isDataDetailError: MutableLiveData<Throwable> = MutableLiveData()
+    val isDataDetailError: LiveData<Throwable> = _isDataDetailError
+
     fun setDetailMovie(movieId: Int) {
         try {
             viewModelScope.launch {
+               _isDataDetailExist.value = false
                 _dataDetailMovie.value = useCase.setDetailMovie(movieId)
+                _isDataDetailExist.value = true
             }
         } catch (throwable: Throwable) {
+            _isDataDetailError.value = throwable
             throw IllegalAccessException(throwable.message)
         }
     }
@@ -147,19 +146,6 @@ class SharedViewModel(
             throw IllegalAccessException(throwable.message)
         }
     }
-
-    fun deleteFavorite(leagueEntity: LeagueEntity) {
-        viewModelScope.launch {
-            useCase.setFavorite(leagueEntity, false)
-        }
-    }
-
-    fun saveFavorite(leagueEntity: LeagueEntity) {
-        viewModelScope.launch {
-            useCase.setFavorite(leagueEntity, true)
-        }
-    }
-
 
     //isUpdateUserProfile
     private val _isUpdateUserProfile = MutableLiveData<Boolean>()
@@ -203,6 +189,8 @@ class SharedViewModel(
     }
 
 
+    private var _successLogout = MutableLiveData<Boolean>()
+    val successLogout: LiveData<Boolean> = _successLogout
 
     fun logout() {
         viewModelScope.launch {
@@ -211,4 +199,31 @@ class SharedViewModel(
             _successLogout.value = true
         }
     }
+
+    //Local Database
+
+    private val _isFavoriteMovieExists = MutableLiveData<Boolean>()
+    val isFavoriteMovieExists: LiveData<Boolean> = _isFavoriteMovieExists
+
+    fun checkFavoriteMovie(id:Int) {
+        viewModelScope.launch {
+            _isFavoriteMovieExists.value = useCase.checkMovieFavorite(id)
+        }
+    }
+
+    fun insertFavoriteMovie(movie: Movies){
+        viewModelScope.launch {
+            useCase.insertDataMovieFavorite(movie)
+            checkFavoriteMovie(movie.id)
+        }
+    }
+
+    fun deleteFavoriteMovie(id:Int){
+        viewModelScope.launch {
+            useCase.deleteFromFavoriteMovie(id)
+            checkFavoriteMovie(id)
+        }
+    }
+
+    val dataFavoriteMovie: LiveData<List<Movies>> = useCase.getAllDataFavoriteMovie()
 }

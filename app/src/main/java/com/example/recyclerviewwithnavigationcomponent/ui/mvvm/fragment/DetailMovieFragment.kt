@@ -1,5 +1,6 @@
 package com.example.recyclerviewwithnavigationcomponent.ui.mvvm.fragment
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -7,11 +8,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import com.example.recyclerviewwithnavigationcomponent.R
 import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.DataItemCollections
+import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.DetailMovie
+import com.example.recyclerviewwithnavigationcomponent.data.model.dataClass.Movies
 import com.example.recyclerviewwithnavigationcomponent.databinding.FragmentDetailMovieBinding
 import com.example.recyclerviewwithnavigationcomponent.ui.adapter.DetailTeamsRecyclerview
 import com.example.recyclerviewwithnavigationcomponent.ui.mvvm.SharedViewModel
@@ -19,12 +25,13 @@ import com.example.recyclerviewwithnavigationcomponent.ui.mvvm.SharedViewModel
 class DetailMovieFragment : Fragment() {
 
     private lateinit var binding: FragmentDetailMovieBinding
+    private lateinit var recyclerAdapter: DetailTeamsRecyclerview
+    private lateinit var dataFavoriteMovie: Movies
 
     private val viewModel: SharedViewModel by activityViewModels<SharedViewModel> {
         SharedViewModel.provideFactory(this, requireContext())
     }
 
-    private lateinit var recyclerAdapter: DetailTeamsRecyclerview
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,12 +46,20 @@ class DetailMovieFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setDisplayDataDetailMovie()
+        observeFavoriteStatus()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setDisplayDataDetailMovie() {
         viewModel.dataCollections.observe(viewLifecycleOwner) {
             recyclerAdapter.submitList(it)
         }
+
+
+        viewModel.isDataDetailError.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), "Data is ${it.message}", Toast.LENGTH_SHORT).show()
+        }
+
         viewModel.dataDetailMovie.observe(viewLifecycleOwner) {
             Log.d("getCollection", "dataCollection id: ${it.getCollections?.id}")
             binding.bannerImage.load(it.backdropPath)
@@ -53,7 +68,7 @@ class DetailMovieFragment : Fragment() {
             binding.genres.text = it.genres
             binding.releaseDate.text = it.releaseDate
             binding.duration.text = it.runtime
-            binding.voteAverage.text = it.voteAverage
+            binding.voteAverage.text = "Vote: ${it.voteAverage}"
             binding.detailSummary.text = it.overview
             binding.titleCollections.text = it.getCollections?.name
             if (it.getCollections != null) {
@@ -61,6 +76,15 @@ class DetailMovieFragment : Fragment() {
             } else {
                 viewModel.setDetailCollection(1)
             }
+            dataFavoriteMovie = Movies(
+                id = it.id,
+                originalTitle = it.originalTitle,
+                image = it.posterPath,
+                voteAverage = it.voteAverage,
+                releaseDate = it.releaseDate
+            )
+            //cara makek boolean
+            viewModel.checkFavoriteMovie(it.id)
         }
         recyclerviewSetup()
     }
@@ -83,5 +107,38 @@ class DetailMovieFragment : Fragment() {
             Uri.parse("https://www.google.com/search?q=${data.originalTitle}")
         )
         context?.startActivity(intent)
+    }
+
+    private fun observeFavoriteStatus() {
+        viewModel.isFavoriteMovieExists.observe(viewLifecycleOwner) {
+            updateFavoriteButton(it)
+        }
+    }
+
+    private fun updateFavoriteButton(isFavorite: Boolean) {
+        if (isFavorite) {
+            binding.btnFavorite.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.remove_bookmark_favorite
+                )
+            )
+            binding.btnFavorite.setOnClickListener {
+                viewModel.deleteFavoriteMovie(dataFavoriteMovie.id)
+                Log.d("Delete Favorite", "updateFavoriteButton: $isFavorite")
+            }
+
+        } else {
+            binding.btnFavorite.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.add_bookmark_favorite
+                )
+            )
+            binding.btnFavorite.setOnClickListener {
+                viewModel.insertFavoriteMovie(dataFavoriteMovie)
+                Log.d("Add Favorite", "updateFavoriteButton: $isFavorite")
+            }
+        }
     }
 }

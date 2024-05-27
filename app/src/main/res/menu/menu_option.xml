@@ -6,18 +6,16 @@
     <item
         android:id="@+id/btn_profile"
         android:title="@string/profile"
-        android:orderInCategory="0"
+        android:orderInCategory="1"
+        android:icon="@drawable/account_circle"
+        app:showAsAction="ifRoom"
         />
     <item
         android:id="@+id/btn_favorite"
         android:title="@string/favorite"
-        app:showAsAction="never" />
+        android:icon="@drawable/favorite"
+        app:showAsAction="ifRoom"
 
-
-    <item
-        android:id="@+id/btn_logout"
-        android:title="@string/logout"
-        app:showAsAction="never" />
-
+        />
 
 </menu>
